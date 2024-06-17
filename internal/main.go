@@ -1,6 +1,6 @@
 package main
 
-import "go-todo-server/internal/transport"
+import "simple-go-blog-webserver/internal/transport"
 
 func main() {
 	server := transport.NewServer(":8080")
