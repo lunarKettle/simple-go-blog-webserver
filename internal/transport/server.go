@@ -14,7 +14,11 @@ func NewServer(address string) *HTTPServer {
 }
 
 func (s *HTTPServer) Start() error {
-	handler := &appHandler{}
-	fmt.Printf("Starting server at %s\n", s.Address)
-	return http.ListenAndServe(s.Address, handler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /users", createUser)
+	err := http.ListenAndServe(s.Address, mux)
+	if err == nil {
+		fmt.Printf("Starting server at %s\n", s.Address)
+	}
+	return err
 }
