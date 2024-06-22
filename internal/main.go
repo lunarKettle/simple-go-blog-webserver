@@ -13,5 +13,6 @@ func main() {
 		fmt.Println("Ошибка базы данных")
 	}
 	defer database.CloseConnection()
+	fmt.Printf("Starting server at %s\n", server.Address)
 	server.Start()
 }

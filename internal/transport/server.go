@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -16,9 +15,5 @@ func NewServer(address string) *HTTPServer {
 func (s *HTTPServer) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /users", createUser)
-	err := http.ListenAndServe(s.Address, mux)
-	if err == nil {
-		fmt.Printf("Starting server at %s\n", s.Address)
-	}
-	return err
+	return http.ListenAndServe(s.Address, mux)
 }

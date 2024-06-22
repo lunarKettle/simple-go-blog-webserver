@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"log"
+	"simple-go-blog-webserver/internal/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -26,7 +27,7 @@ func CheckConnection(db *sql.DB) error {
 	return err
 }
 
-func CreateUser(name string, userName string, email string) error {
-	_, err := db.Exec("insert into blog_webserver_db.users (name, username, email) values (?, ?, ?)", name, userName, email)
+func CreateUser(newUser models.User) error {
+	_, err := db.Exec("insert into blog_webserver_db.users (name, username, email) values (?, ?, ?)", newUser.Name, newUser.UserName, newUser.Email)
 	return err
 }
