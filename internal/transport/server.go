@@ -15,5 +15,6 @@ func NewServer(address string) *HTTPServer {
 func (s *HTTPServer) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /users", createUser)
+	mux.HandleFunc("GET /users", getUsers)
 	return http.ListenAndServe(s.Address, mux)
 }

@@ -28,6 +28,30 @@ func CheckConnection(db *sql.DB) error {
 }
 
 func CreateUser(newUser models.User) error {
-	_, err := db.Exec("insert into blog_webserver_db.users (name, username, email) values (?, ?, ?)", newUser.Name, newUser.UserName, newUser.Email)
+	_, err := db.Exec("INSERT INTO blog_webserver_db.users (name, username, email) VALUES (?, ?, ?)", newUser.Name, newUser.UserName, newUser.Email)
 	return err
+}
+
+func GetUsers() ([]models.User, error) {
+	rows, err := db.Query("SELECT id, name, username, email FROM blog_webserver_db.users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.Id, &user.Name, &user.UserName,
+			&user.Email); err != nil {
+			return users, err
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return users, err
+	}
+	return users, nil
 }
