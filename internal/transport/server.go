@@ -16,5 +16,6 @@ func (s *HTTPServer) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /users", createUser)
 	mux.HandleFunc("GET /users", getUsers)
+	mux.HandleFunc("GET /users/{id}", getUserById)
 	return http.ListenAndServe(s.Address, mux)
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"simple-go-blog-webserver/internal/models"
 
@@ -9,6 +10,7 @@ import (
 )
 
 var db *sql.DB
+var ErrNoRows = errors.New("No rows found")
 
 func OpenConnection() (err error) {
 	db, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
@@ -54,4 +56,17 @@ func GetUsers() ([]models.User, error) {
 		return users, err
 	}
 	return users, nil
+}
+
+func GetUserById(userId int) (models.User, error) {
+	query := "SELECT * FROM blog_webserver_db.users WHERE id = ?"
+	var user models.User
+	err := db.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.UserName, &user.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user, ErrNoRows
+		}
+		return user, err
+	}
+	return user, nil
 }
