@@ -1,0 +1,7 @@
+CREATE TABLE posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text TEXT NOT NULL,
+    userId INT NOT NULL,
+    date DATETIME NOT NULL,
+    isChanged BOOLEAN NOT NULL
+);
