@@ -8,11 +8,11 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 3306,
-            "driver": "MySQL",
+            "driver": "MariaDB",
             "name": "Blog webserver",
-            "database": "blog_webserver_db",
             "username": "admin",
-            "password": "admin"
+            "password": "admin",
+            "database": "blog_webserver_db"
         }
     ]
 }
