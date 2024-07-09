@@ -3,6 +3,6 @@ package models
 type User struct {
 	Id       int
 	Name     string
-	UserName string
+	Username string
 	Email    string
 }

@@ -10,7 +10,9 @@ import (
 )
 
 var db *sql.DB
-var ErrNoRows = errors.New("No rows found")
+var ErrNoRows = errors.New("no rows found")
+var ErrEmailIsOccupied = errors.New("email is occupied by another user")
+var ErrUsernameIsOccupied = errors.New("username is occupied by another user")
 
 func OpenConnection() (err error) {
 	db, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
@@ -30,7 +32,42 @@ func CheckConnection(db *sql.DB) error {
 }
 
 func CreateUser(newUser models.User) error {
-	_, err := db.Exec("INSERT INTO blog_webserver_db.users (name, username, email) VALUES (?, ?, ?)", newUser.Name, newUser.UserName, newUser.Email)
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	var usernameExists bool
+	checkUsernameQuery := "SELECT EXISTS(SELECT 1 FROM blog_webserver_db.users WHERE username = ?)"
+	err = tx.QueryRow(checkUsernameQuery, newUser.Username).Scan(&usernameExists)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if usernameExists {
+		tx.Rollback()
+		return ErrUsernameIsOccupied
+	}
+
+	var emailExists bool
+	checkEmailQuery := "SELECT EXISTS(SELECT 1 FROM blog_webserver_db.users WHERE email = ?)"
+	err = tx.QueryRow(checkEmailQuery, newUser.Email).Scan(emailExists)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if emailExists {
+		tx.Rollback()
+		return ErrEmailIsOccupied
+	}
+
+	_, err = tx.Exec("INSERT INTO blog_webserver_db.users (name, username, email) VALUES (?, ?, ?)", newUser.Name, newUser.Username, newUser.Email)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
 	return err
 }
 
@@ -45,7 +82,7 @@ func GetUsers() ([]models.User, error) {
 
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.Id, &user.Name, &user.UserName,
+		if err := rows.Scan(&user.Id, &user.Name, &user.Username,
 			&user.Email); err != nil {
 			return users, err
 		}
@@ -61,7 +98,7 @@ func GetUsers() ([]models.User, error) {
 func GetUserById(userId int) (models.User, error) {
 	query := "SELECT * FROM blog_webserver_db.users WHERE id = ?"
 	var user models.User
-	err := db.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.UserName, &user.Email)
+	err := db.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, ErrNoRows

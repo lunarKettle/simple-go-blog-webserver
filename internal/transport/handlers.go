@@ -15,11 +15,21 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	userName := r.URL.Query().Get("username")
 	email := r.URL.Query().Get("email")
-	newUser := models.User{Name: name, UserName: userName, Email: email}
+	newUser := models.User{Name: name, Username: userName, Email: email}
 	fmt.Println("User added successfully")
 
 	err := database.CreateUser(newUser)
 	if err != nil {
+		if err == database.ErrEmailIsOccupied {
+			http.Error(w, err.Error(), http.StatusConflict)
+			log.Println(err)
+			return
+		}
+		if err == database.ErrUsernameIsOccupied {
+			http.Error(w, err.Error(), http.StatusConflict)
+			log.Println(err)
+			return
+		}
 		http.Error(w, "Failed to add users to database", http.StatusInternalServerError)
 		log.Println("Failed to add user to database", err)
 		return
