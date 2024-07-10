@@ -9,6 +9,7 @@ import (
 	"simple-go-blog-webserver/internal/models"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func createUser(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +83,26 @@ func getUserById(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, "Failed to encode users to JSON", http.StatusInternalServerError)
 		log.Println("Failed to encode users to JSON:", err)
+		return
+	}
+}
+
+func addPost(w http.ResponseWriter, r *http.Request) {
+	text := r.URL.Query().Get("text")
+	userId, err := strconv.Atoi(r.URL.Query().Get("userId"))
+
+	if err != nil {
+		http.Error(w, "Failed to get parameters from URL", http.StatusInternalServerError)
+		log.Println("Failed to get userId from URL:", err)
+		return
+	}
+
+	newPost := models.Post{Text: text, UserId: userId, Date: time.Now(), IsChanged: false}
+
+	err = database.AddPost(newPost)
+	if err != nil {
+		http.Error(w, "Failed to add post to database:", http.StatusInternalServerError)
+		log.Println("Failed to add post to database:", err)
 		return
 	}
 }

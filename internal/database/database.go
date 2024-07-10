@@ -107,3 +107,9 @@ func GetUserById(userId int) (models.User, error) {
 	}
 	return user, nil
 }
+
+func AddPost(newPost models.Post) error {
+	query := "INSERT INTO blog_webserver_db.posts (text, userId, date, isChanged) VALUES (?, ?, ?, ?)"
+	_, err := db.Exec(query, newPost.Text, newPost.UserId, newPost.Date, newPost.IsChanged)
+	return err
+}
