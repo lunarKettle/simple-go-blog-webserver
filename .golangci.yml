@@ -1,0 +1,21 @@
+run:
+  timeout: 5m
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-use-default: false
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - staticcheck
+    - structcheck
+    - unused
+    - varcheck
+linters-settings:
+  errcheck:
+    # report about not checking errors in type assertions: https://golang.org/ref/spec#Type_assertions
+    check-type-assertions: true
+    # report about assignment of errors to blank identifier: https://golang.org/doc/go1.13#testing
+    check-blank: true
