@@ -13,6 +13,7 @@ var db *sql.DB
 var ErrNoRows = errors.New("no rows found")
 var ErrEmailIsOccupied = errors.New("email is occupied by another user")
 var ErrUsernameIsOccupied = errors.New("username is occupied by another user")
+var ErrFailToGetUsers = errors.New("failed to get users from database")
 
 func OpenConnection() (err error) {
 	db, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
