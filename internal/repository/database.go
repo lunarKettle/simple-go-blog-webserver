@@ -1,4 +1,4 @@
-package database
+package repository
 
 import (
 	"database/sql"
@@ -9,31 +9,34 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
 var ErrNoRows = errors.New("no rows found")
 var ErrEmailIsOccupied = errors.New("email is occupied by another user")
 var ErrUsernameIsOccupied = errors.New("username is occupied by another user")
 var ErrFailToGetUsers = errors.New("failed to get users from database")
 
-func OpenConnection() (err error) {
-	db, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
+type Database struct {
+	connection *sql.DB
+}
+
+func (db *Database) OpenConnection() (err error) {
+	db.connection, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
 	return
 }
 
-func CloseConnection() (err error) {
-	return db.Close()
+func (db *Database) CloseConnection() (err error) {
+	return db.connection.Close()
 }
 
-func CheckConnection(db *sql.DB) error {
-	err := db.Ping()
+func (db *Database) CheckConnection() error {
+	err := db.connection.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 	return err
 }
 
-func CreateUser(newUser models.User) error {
-	tx, err := db.Begin()
+func (db *Database) CreateUser(newUser models.User) error {
+	tx, err := db.connection.Begin()
 	if err != nil {
 		return err
 	}
@@ -72,8 +75,8 @@ func CreateUser(newUser models.User) error {
 	return err
 }
 
-func GetUsers() ([]models.User, error) {
-	rows, err := db.Query("SELECT id, name, username, email FROM blog_webserver_db.users")
+func (db *Database) GetUsers() ([]models.User, error) {
+	rows, err := db.connection.Query("SELECT id, name, username, email FROM blog_webserver_db.users")
 	if err != nil {
 		return nil, err
 	}
@@ -96,10 +99,10 @@ func GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func GetUserById(userId int) (models.User, error) {
+func (db *Database) GetUserById(userId int) (models.User, error) {
 	query := "SELECT * FROM blog_webserver_db.users WHERE id = ?"
 	var user models.User
-	err := db.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
+	err := db.connection.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, ErrNoRows
@@ -109,8 +112,8 @@ func GetUserById(userId int) (models.User, error) {
 	return user, nil
 }
 
-func AddPost(newPost models.Post) error {
+func (db *Database) AddPost(newPost models.Post) error {
 	query := "INSERT INTO blog_webserver_db.posts (text, userId, date, isChanged) VALUES (?, ?, ?, ?)"
-	_, err := db.Exec(query, newPost.Text, newPost.UserId, newPost.Date, newPost.IsChanged)
+	_, err := db.connection.Exec(query, newPost.Text, newPost.UserId, newPost.Date, newPost.IsChanged)
 	return err
 }
