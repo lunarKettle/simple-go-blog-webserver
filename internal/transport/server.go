@@ -41,13 +41,14 @@ func ErrorHandling(handler Handler) http.Handler {
 }
 
 type HTTPServer struct {
-	Address  string
-	database repository.Database
+	Address        string
+	database       repository.Database
+	userRepository repository.UserRepository
+	postRepository repository.PostRepository
 }
 
 func NewServer(address string) *HTTPServer {
-	var db repository.Database
-	return &HTTPServer{Address: address, database: db}
+	return &HTTPServer{Address: address}
 }
 
 func (s *HTTPServer) Start() error {
@@ -58,6 +59,8 @@ func (s *HTTPServer) Start() error {
 	mux.Handle("GET /users/{id}", eh(s.getUserById))
 	mux.Handle("POST /posts", eh(s.addPost))
 	s.database.OpenConnection()
+	s.userRepository = repository.NewUserRepository(s.database)
+	s.postRepository = repository.NewPostRepository(s.database)
 	defer s.database.CloseConnection()
 	return http.ListenAndServe(s.Address, mux)
 }
@@ -68,7 +71,7 @@ func (s *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) error {
 	email := r.URL.Query().Get("email")
 	newUser := models.User{Name: name, Username: userName, Email: email}
 
-	err := s.database.CreateUser(newUser)
+	err := s.userRepository.CreateUser(newUser)
 	if err != nil {
 		err := fmt.Errorf("failed to add user to database: %w", err)
 		return err
@@ -79,7 +82,7 @@ func (s *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (s *HTTPServer) getUsers(w http.ResponseWriter, r *http.Request) error {
-	users, err := s.database.GetUsers()
+	users, err := s.userRepository.GetUsers()
 	if err != nil {
 		return err
 	}
@@ -101,7 +104,7 @@ func (s *HTTPServer) getUserById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user, err := s.database.GetUserById(id)
+	user, err := s.userRepository.GetUserById(id)
 	if err != nil {
 		err = fmt.Errorf("failed to get user from database: %w", err)
 		return err
@@ -127,7 +130,7 @@ func (s *HTTPServer) addPost(w http.ResponseWriter, r *http.Request) error {
 
 	newPost := models.Post{Text: text, UserId: userId, Date: time.Now(), IsChanged: false}
 
-	err = s.database.AddPost(newPost)
+	err = s.postRepository.AddPost(newPost)
 	if err != nil {
 		err = fmt.Errorf("failed to add post to database: %w", err)
 		return err
