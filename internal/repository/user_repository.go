@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var ErrNoRows = errors.New("no rows found")
+var ErrNotFound = errors.New("no record found")
 var ErrEmailIsOccupied = errors.New("email is occupied by another user")
 var ErrUsernameIsOccupied = errors.New("username is occupied by another user")
 var ErrFailToGetUsers = errors.New("failed to get users from database")
@@ -91,7 +91,7 @@ func (ur *UserRepository) GetUserById(userId int) (models.User, error) {
 	err := ur.db.QueryRow(query, userId).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, ErrNoRows
+			return user, ErrNotFound
 		}
 		return user, err
 	}

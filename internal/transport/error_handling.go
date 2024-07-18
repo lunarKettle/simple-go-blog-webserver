@@ -9,7 +9,7 @@ import (
 
 type Handler = func(http.ResponseWriter, *http.Request) error
 
-func ErrorHandling(handler Handler) http.Handler {
+func errorHandling(handler Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := handler(w, r); err != nil {
 			if errors.Is(err, repository.ErrEmailIsOccupied) {

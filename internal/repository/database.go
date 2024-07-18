@@ -12,7 +12,7 @@ type Database struct {
 }
 
 func (db *Database) OpenConnection() (err error) {
-	db.connection, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db")
+	db.connection, err = sql.Open("mysql", "admin:admin@tcp(127.0.0.1:3306)/blog_webserver_db?parseTime=true")
 	return
 }
 

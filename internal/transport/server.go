@@ -24,11 +24,12 @@ func NewServer(address string) *HTTPServer {
 
 func (s *HTTPServer) Start() error {
 	mux := http.NewServeMux()
-	eh := ErrorHandling
+	eh := errorHandling
 	mux.Handle("POST /users", eh(s.createUser))
 	mux.Handle("GET /users", eh(s.getUsers))
 	mux.Handle("GET /users/{id}", eh(s.getUserById))
 	mux.Handle("POST /posts", eh(s.addPost))
+	mux.Handle("GET /posts/{id}", eh(s.getPostById))
 	s.database.OpenConnection()
 	s.userRepository = repository.NewUserRepository(s.database)
 	s.postRepository = repository.NewPostRepository(s.database)
@@ -104,6 +105,30 @@ func (s *HTTPServer) addPost(w http.ResponseWriter, r *http.Request) error {
 	err = s.postRepository.AddPost(newPost)
 	if err != nil {
 		err = fmt.Errorf("failed to add post to database: %w", err)
+		return err
+	}
+	return err
+}
+
+func (s *HTTPServer) getPostById(w http.ResponseWriter, r *http.Request) error {
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	id, err := strconv.Atoi(parts[len(parts)-1])
+	if err != nil {
+		err = fmt.Errorf("failed to get id from URL: %w", err)
+		return err
+	}
+
+	user, err := s.postRepository.GetPostById(id)
+	if err != nil {
+		err = fmt.Errorf("failed to get post from database: %w", err)
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		err = fmt.Errorf("failed to encode posts to JSON: %w", err)
 		return err
 	}
 	return err
