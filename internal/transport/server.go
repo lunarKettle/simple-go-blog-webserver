@@ -29,6 +29,7 @@ func (s *HTTPServer) Start() error {
 	mux.Handle("GET /users", eh(s.getUsers))
 	mux.Handle("GET /users/{id}", eh(s.getUserById))
 	mux.Handle("POST /posts", eh(s.addPost))
+	mux.Handle("GET /posts", eh(s.getPostByUserId))
 	mux.Handle("GET /posts/{id}", eh(s.getPostById))
 	s.database.OpenConnection()
 	s.userRepository = repository.NewUserRepository(s.database)
@@ -110,6 +111,28 @@ func (s *HTTPServer) addPost(w http.ResponseWriter, r *http.Request) error {
 	return err
 }
 
+func (s *HTTPServer) getPostByUserId(w http.ResponseWriter, r *http.Request) error {
+	userId, err := strconv.Atoi(r.URL.Query().Get("userId"))
+	if err != nil {
+		err = fmt.Errorf("failed to get userId from URL: %w", err)
+		return err
+	}
+
+	posts, err := s.postRepository.GetPostsByUserId(userId)
+	if err != nil {
+		err = fmt.Errorf("failed to get posts from database: %w", err)
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		err = fmt.Errorf("failed to encode posts to JSON: %w", err)
+		return err
+	}
+	return err
+}
+
 func (s *HTTPServer) getPostById(w http.ResponseWriter, r *http.Request) error {
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
@@ -119,7 +142,7 @@ func (s *HTTPServer) getPostById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user, err := s.postRepository.GetPostById(id)
+	post, err := s.postRepository.GetPostById(id)
 	if err != nil {
 		err = fmt.Errorf("failed to get post from database: %w", err)
 		return err
@@ -127,7 +150,7 @@ func (s *HTTPServer) getPostById(w http.ResponseWriter, r *http.Request) error {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	if err := json.NewEncoder(w).Encode(user); err != nil {
+	if err := json.NewEncoder(w).Encode(post); err != nil {
 		err = fmt.Errorf("failed to encode posts to JSON: %w", err)
 		return err
 	}

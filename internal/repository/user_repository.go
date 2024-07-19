@@ -72,8 +72,8 @@ func (ur *UserRepository) GetUsers() ([]models.User, error) {
 
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.Id, &user.Name, &user.Username,
-			&user.Email); err != nil {
+		err := rows.Scan(&user.Id, &user.Name, &user.Username, &user.Email)
+		if err != nil {
 			return users, err
 		}
 		users = append(users, user)
@@ -82,7 +82,7 @@ func (ur *UserRepository) GetUsers() ([]models.User, error) {
 	if err = rows.Err(); err != nil {
 		return users, err
 	}
-	return users, nil
+	return users, err
 }
 
 func (ur *UserRepository) GetUserById(userId int) (models.User, error) {

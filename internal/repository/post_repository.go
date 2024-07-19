@@ -33,3 +33,27 @@ func (pr *PostRepository) GetPostById(postId int) (models.Post, error) {
 	}
 	return post, nil
 }
+
+func (pr *PostRepository) GetPostsByUserId(userId int) ([]models.Post, error) {
+	query := "SELECT * FROM blog_webserver_db.posts WHERE userId = ?"
+	rows, err := pr.db.Query(query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(&post.Id, &post.Text, &post.UserId, &post.Date, &post.IsChanged)
+		if err != nil {
+			return posts, err
+		}
+		posts = append(posts, post)
+	}
+	if err = rows.Err(); err != nil {
+		return posts, err
+	}
+	return posts, err
+}
