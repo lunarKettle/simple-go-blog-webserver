@@ -25,9 +25,11 @@ func (s *HTTPServer) Start() error {
 	mux.Handle("POST /posts", eh(s.addPost))
 	mux.Handle("GET /posts", eh(s.getPostByUserId))
 	mux.Handle("GET /posts/{id}", eh(s.getPostById))
+	timedMux := timingMiddleware(mux)
+
 	s.database.OpenConnection()
 	s.userRepository = repository.NewUserRepository(s.database)
 	s.postRepository = repository.NewPostRepository(s.database)
 	defer s.database.CloseConnection()
-	return http.ListenAndServe(s.Address, mux)
+	return http.ListenAndServe(s.Address, timedMux)
 }
