@@ -32,7 +32,7 @@ func (s *HTTPServer) getUsers(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(users); err != nil {
 		err = fmt.Errorf("failed to encode users to JSON: %w", err)
 		return err
@@ -55,7 +55,7 @@ func (s *HTTPServer) getUserById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		err = fmt.Errorf("failed to encode users to JSON: %w", err)
@@ -96,7 +96,7 @@ func (s *HTTPServer) getPostByUserId(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
 		err = fmt.Errorf("failed to encode posts to JSON: %w", err)
@@ -120,7 +120,7 @@ func (s *HTTPServer) getPostById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(post); err != nil {
 		err = fmt.Errorf("failed to encode posts to JSON: %w", err)
