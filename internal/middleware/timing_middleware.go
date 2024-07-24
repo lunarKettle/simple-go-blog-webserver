@@ -1,4 +1,4 @@
-package transport
+package middleware
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func timingMiddleware(next http.Handler) http.Handler {
+func TimingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 

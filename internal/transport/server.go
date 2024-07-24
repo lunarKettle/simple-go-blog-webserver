@@ -2,6 +2,7 @@ package transport
 
 import (
 	"net/http"
+	"simple-go-blog-webserver/internal/middleware"
 	"simple-go-blog-webserver/internal/repository"
 )
 
@@ -25,8 +26,10 @@ func (s *HTTPServer) Start() error {
 	mux.Handle("POST /posts", eh(s.addPost))
 	mux.Handle("GET /posts", eh(s.getPostByUserId))
 	mux.Handle("GET /posts/{id}", eh(s.getPostById))
-	timedMux := timingMiddleware(mux)
-	finalMux := contentTypeMiddleware(timedMux)
+
+	timedMux := middleware.TimingMiddleware(mux)
+	finalMux := middleware.ContentTypeMiddleware(timedMux)
+
 	s.database.OpenConnection()
 	s.userRepository = repository.NewUserRepository(s.database)
 	s.postRepository = repository.NewPostRepository(s.database)
